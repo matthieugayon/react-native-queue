@@ -108,6 +108,47 @@ export default class Worker {
     const jobPayload = JSON.parse(job.payload);
 
     if (jobTimeout > 0) {
+
+      const cachedSetTimeout = setTimeout;
+
+      function createSleepPromise(timeout, { useCachedSetTimeout }) {
+          const timeoutFunction = useCachedSetTimeout ? cachedSetTimeout : setTimeout;
+
+          return new Promise((resolve) => {
+              timeoutFunction(resolve, timeout);
+          });
+      }
+
+      function sleep(timeout, { useCachedSetTimeout } = {}) {
+          const sleepPromise = createSleepPromise(timeout, { useCachedSetTimeout });
+
+          // Pass value through, if used in a promise chain
+          function promiseFunction(value) {
+              return sleepPromise.then(() => value);
+          }
+
+          // Normal promise
+          promiseFunction.then = (...args) => sleepPromise.then(...args);
+          promiseFunction.catch = Promise.resolve().catch;
+
+          return promiseFunction;
+      }
+
+      export class TimeoutException extends Error {};
+
+      async function timeout(promise, ms = 10000) {
+        const failure = {};
+        const result = await Promise.race([
+          promise,
+          sleep(ms).then(() => failure)
+        ]);
+        if (result === failure) {
+          throw new TimeoutException(`operation timed out after ${ms} milliseconds`);
+        } else {
+          return result;
+        }
+      }
+
       try {
         await timeout(Worker.workers[jobName](jobId, jobPayload), jobTimeout)
       } catch (err) {

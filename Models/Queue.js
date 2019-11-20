@@ -331,7 +331,7 @@ export class Queue {
     const jobPayload = JSON.parse(job.payload);
 
     // Fire onStart job lifecycle callback
-    this.worker.executeJobLifecycleCallback('onStart', jobName, jobId, jobPayload);
+    await this.worker.executeJobLifecycleCallback('onStart', jobName, jobId, jobPayload);
 
     try {
 
@@ -345,8 +345,8 @@ export class Queue {
       });
 
       // Job has processed successfully, fire onSuccess and onComplete job lifecycle callbacks.
-      this.worker.executeJobLifecycleCallback('onSuccess', jobName, jobId, jobPayload);
-      this.worker.executeJobLifecycleCallback('onComplete', jobName, jobId, jobPayload);
+      await this.worker.executeJobLifecycleCallback('onSuccess', jobName, jobId, jobPayload);
+      await this.worker.executeJobLifecycleCallback('onComplete', jobName, jobId, jobPayload);
 
     } catch (error) {
 
@@ -382,12 +382,12 @@ export class Queue {
       });
 
       // Execute job onFailure lifecycle callback.
-      this.worker.executeJobLifecycleCallback('onFailure', jobName, jobId, jobPayload);
+      await this.worker.executeJobLifecycleCallback('onFailure', jobName, jobId, jobPayload);
 
       // If job has failed all attempts execute job onFailed and onComplete lifecycle callbacks.
       if (jobData.failedAttempts >= jobData.attempts) {
-        this.worker.executeJobLifecycleCallback('onFailed', jobName, jobId, jobPayload);
-        this.worker.executeJobLifecycleCallback('onComplete', jobName, jobId, jobPayload);
+        await this.worker.executeJobLifecycleCallback('onFailed', jobName, jobId, jobPayload);
+        await this.worker.executeJobLifecycleCallback('onComplete', jobName, jobId, jobPayload);
       }
 
     }
