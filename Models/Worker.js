@@ -1,4 +1,5 @@
-// import timeout, { TimeoutException } from '../Utils/timeout'
+import timeout, { TimeoutException } from '../Utils/timeout'
+
 /**
  *
  * Worker Model
@@ -108,29 +109,6 @@ export default class Worker {
     const jobPayload = JSON.parse(job.payload);
 
     if (jobTimeout > 0) {
-
-      class TimeoutException extends Error {};
-
-      // let res = null
-      let timeoutId = null
-
-      function resolveAfter(ms, value=undefined) {
-        return new Promise((resolve, reject) => {
-          timeoutId = setTimeout(() => resolve(value), ms);
-        });
-      }
-
-      function timeout(promise, timeoutInMs) {
-        return Promise.race([
-          promise,
-          resolveAfter(timeoutInMs,
-            Promise.reject(new TimeoutException('Operation timed out'))),
-        ]).then(res => {
-          clearTimeout(timeoutId)
-          return res
-        })
-      }
-      
       try {
         await timeout(Worker.workers[jobName](jobId, jobPayload), jobTimeout)
       } catch (err) {
