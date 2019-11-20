@@ -1,4 +1,4 @@
-import sleep from 'promise-sleep';
+import sleep from 'sleep-promise';
 
 export class TimeoutException extends Error {};
 
