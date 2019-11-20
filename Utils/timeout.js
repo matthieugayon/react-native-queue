@@ -1,4 +1,4 @@
-class TimeoutException extends Error {};
+export class TimeoutException extends Error {};
 
 let timeoutId = null
 
@@ -8,7 +8,7 @@ function resolveAfter(ms, value=undefined) {
   });
 }
 
-function timeout(promise, timeoutInMs) {
+export function timeout(promise, timeoutInMs) {
   return Promise.race([
     promise,
     resolveAfter(timeoutInMs,
